@@ -1,4 +1,18 @@
-<?php include "db.php"; ?>
+<?php
+
+include "db.php";
+function redirect($url)
+{
+    if (!headers_sent()){
+        header("Location: $url");
+    }else{
+        echo "<script type='text/javascript'>window.location.href='$url'</script>";
+        echo "<noscript><meta http-equiv='refresh' content='0;url=$url'/></noscript>";
+    }
+    exit;
+}
+
+?>
 
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
@@ -11,6 +25,7 @@
     integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous" />
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css"
     integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous" />
+    <link rel="icon" type="image/x-icon" sizes="16x16" href="./img/logo.png">
   <link rel="stylesheet" href="./css/style_Dashboard6.css" />
 
   <title>
@@ -88,9 +103,23 @@ if(!empty($_REQUEST['id'])){
                 if(!empty($_REQUEST['id']) && !empty($_REQUEST['accessPage'])){
                   $userID = $_REQUEST['id'];
                   $Access = $_REQUEST['accessPage'];
-                  echo "<li class=\"nav-item\"><a class=\"nav-link text-right text-white sidebar-link p-2 mb-2\" href=\"chat.php?id=$userID&accessPage=$Access&message=in\"><i class=\"fas fa-envelope text-light fa-lg ml-3\"></i> پیام ها </a></li>";
+
+                  $select = "SELECT * FROM users WHERE userID = $userID";
+                  $selectResult= $pdoObj->query($select);
+                  foreach($selectResult as $row){
+                  if($row['nationalCode'] == NULL || $row['email'] == NULL || $row['fullAddress'] == NULL || $row['age'] == NULL || $row['gender'] == NULL || $row['maritalStatus'] == NULL || $row['imageProfile'] == NULL){
+                    $bool_info = false;
+
+                  }else{
+                    $bool_info = true;
+                    echo "<li class=\"nav-item\"><a class=\"nav-link text-right text-white sidebar-link p-2 mb-2\" href=\"chat.php?id=$userID&accessPage=$Access&message=in\"><i class=\"fas fa-envelope text-light fa-lg ml-3\"></i> پیام ها </a></li>";
+                  }
+                  }
                 }
-                
+
+
+
+                                  
                   if(!empty($_REQUEST['id']) && !empty($_REQUEST['accessPage'])){
                     $userID = $_REQUEST['id'];
                     $Access = $_REQUEST['accessPage'];
@@ -148,14 +177,14 @@ if(!empty($_REQUEST['id'])){
               </div>
               <div class="col-md-3">
                 <ul class="navbar-nav">
-                  <li class="navbar-item icon-parent">
+                  <!-- <li class="navbar-item icon-parent">
                     <a href="#" class="nav-link icon-bullet text-left">
                       <i class="fas fa-comments text-muted fa-lg"></i>
                     </a>
                   </li>
                   <li class="navbar-item icon-parent">
                     <a href="#" class="nav-link icon-bullet text-left"><i class="fas fa-bell text-muted fa-lg"></i></a>
-                  </li>
+                  </li> -->
                   <li class="navbar-item mr-auto">
                     <a class="nav-link " href="index.php"><i class="fas fa-sign-out-alt text-danger fa-lg"></i></a>
                   </li>
@@ -221,7 +250,7 @@ if(isset($_POST['send'])){
           $ext = $validFileExt[$fileExtIndex];
           }else{
           echo " فرمت تصویر وارد شده درست نیست ";
-          exit();
+          // exit();
           }
   
       $ImageDir = "img/";
@@ -252,11 +281,11 @@ if(isset($_POST['send'])){
         $pdoObj->query($update);    
 } else{
 echo "<br> تغییر نام فایل به درستی انجام نشده است<br>";
-exit();
+// exit();
 }
     }else{
       echo "<br>File Submission Error1!<br>";
-      exit();
+      // exit();
       }
     
     }else{
@@ -270,6 +299,16 @@ exit();
         VALUES (?, ?, ?, ?, ?, ?)";
         $insertStmnt = $pdoObj->prepare($insert);
         $insertStmnt->execute([$fullName,$chatMessage,$today,$imageProfile,$userID,$destination]);
+
+        if(!empty($_REQUEST['id']) && !empty($_REQUEST['accessPage'])){
+          $userID = $_REQUEST['id'];
+          $Access = $_REQUEST['accessPage'];
+          redirect("managment.php?id=$userID&accessPage=$Access&sendMessage=false");   
+        }else{
+          redirect("managment.php?sendMessage=false"); 
+        }
+
+
       }
     }catch(PDOException $e){
         echo "Error: " . $e->getMessage();
@@ -305,22 +344,22 @@ if(isset($_POST['signup'])){
           $insertStmnt->execute([$fullName,$phoneNumber,$password,$Access]);
           if($insertStmnt == true){
             echo "<b><font color=\"green\"> اطلاعات به درستی ذخیره شده </font></b>";
-            echo "<br><a class=\"btn btn-outline-success text-center mt-2\" href=\"managment.php?id=$userID&accessPage=$Access\"> ادامه </a>";
+            echo "<br><a class=\"btn btn-outline-success text-center mt-2\" href=\"managment.php?id=$userID&accessPage=managment\"> ادامه </a>";
           exit;
           }else{
             echo "<b> <font color=\"red\">  !!!اطلاعات به درستی ذخیره نشده است!!!</font> </b>";
-            echo "<br><a class=\"btn btn-outline-info text-center mt-2\" href=\"managment.php?id=$userID&accessPage=$Access\"> تلاش مجدد </a>";
+            echo "<br><a class=\"btn btn-outline-info text-center mt-2\" href=\"managment.php?id=$userID&accessPage=managment\"> تلاش مجدد </a>";
           exit;
           }
         }
     }else{
       echo "<b> <font color=\"red\"> !!!پسوورد ها با هم برابر نیستند!!!</font></b>";
-      echo "<br><a class=\"btn btn-outline-info text-center mt-2\" href=\"managment.php?id=$userID&accessPage=$Access\"> تلاش مجدد </a>";
+      echo "<br><a class=\"btn btn-outline-info text-center mt-2\" href=\"managment.php?id=$userID&accessPage=managment\"> تلاش مجدد </a>";
       exit;
     }
   }else{
     echo "<b> <font color=\"red\">  !!!لطفا تمامی اطلاعات را به درستی وارد کنید!!!</font> </b>";
-    echo "<br><a class=\"btn btn-outline-info text-center mt-2\" href=\"managment.php?id=$userID&accessPage=$Access\"> تلاش مجدد </a>";
+    echo "<br><a class=\"btn btn-outline-info text-center mt-2\" href=\"managment.php?id=$userID&accessPage=managment\"> تلاش مجدد </a>";
     exit;
   }
 
@@ -387,26 +426,23 @@ echo "</div>";
               <section id="posts">
                 <div class="container">
                   <div class="row">
-                    <div class="col-md-9">
-                      <!-- <div class="card"> -->
-                        <!-- <div class="card-header">
-                          <h4> آمار کار های انجام شده </h4>
-                        </div> -->
+                    <div class="col-md-12">
                         <?php
-              $select = "SELECT * FROM users";
+                        $managment = "management";
+              $select = "SELECT * FROM users WHERE Access NOT LIKE '$managment'";
               $selectResult= $pdoObj->query($select);
 
                     echo "<h4 class=\"text-center text-muted font-weight-bold mb-3\"> کاربران و کارمندان </h4>";
                     echo "<table class=\"table bg-light text-center\">";
                     echo "<thead class=\"thead-dark\">";
                     echo "<tr>";
-                    echo "<th>#</th>";
+                    echo "<th>آی دی</th>";
                     echo "<th> نام و نام خانوادگی </th>";
                     echo "<th> شماره تلفن </th>";
                     echo "<th> ایمیل </th>";
                     echo "<th> آدرس </th>";
                     echo "<th> نوع دسترسی </th>";
-                    echo "<th> مشاهده پروفایل </th>";
+                    echo "<th> حذف </th>";
                     echo "</tr>";
                         echo "</thead>";
                         
@@ -420,50 +456,22 @@ echo "</div>";
                          echo "<td>" .$row['email'] ."</td>";
                          echo "<td>" .$row['fullAddress'] ."</td>";
                          echo "<td>" .$row['Access'] ."</td>";
-                         echo "<td><a href=\"#\" class=\"btn btn-outline-info\"> مشاهده </a></td>";
+                         $removeid = $row['userID'];
+                         echo "<td><a href=\"managment.php?id=$userID&accessPage=managment&removeid=$removeid\" class=\"btn btn-outline-danger\"> حذف </a></td>";
                            echo "</tr>";
                        }
+
+                       ////////////////460//////////
+                       if(!empty($_REQUEST['removeid'])){
+                        $remove = $_REQUEST['removeid'];
+                          $delete = "DELETE FROM users
+                          WHERE userID = $remove";
+                          $results = $pdoObj->query($delete);
+                          redirect("managment.php?id=$userID&accessPage=managment");  
+                      }
                        echo "</tbody>";
                        echo "</table>";
                        ?>
-
-                      <!-- </div> -->
-                    </div>
-                    <div class="col-md-3">
-                      <div class="card border-bottom-danger shadow mb-3 py-2">          
-                        <div class="card-body">            
-                          <div class="row no-gutters align-items-center">            
-                            <div class="col text-center mr-2">            
-                              <h5 class="font-weight-bold text-muted mb-3"><i class="fas fa-dollar-sign text-muted"> </i> فروش در
-                                ماه
-                              </h5>
-                              <h5 class="mb-0 font-weight-bold text-muted"> 1200000 میلیون </h5>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="card border-bottom-danger shadow mb-3 py-2">
-                        <div class="card-body">
-                          <div class="row no-gutters align-items-center">
-                            <div class="col text-center mr-2">
-                              <h5 class="font-weight-bold text-muted mb-3"><i class="fas fa-calendar text-muted"> </i> آمار فروش
-                              </h5>
-                              <h5 class="mb-0 font-weight-bold text-muted"> 1 ماه اخیر </h5>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="card border-bottom-danger shadow mb-3 py-2">
-                        <div class="card-body">
-                          <div class="row no-gutters align-items-center">
-                            <div class="col text-center mr-2">
-                              <h5 class="font-weight-bold text-muted mb-3"><i class="fas fa-comments  text-muted"> </i> پیام
-                              </h5>
-                              <h5 class="mb-0 font-weight-bold text-muted"> 123 </h5>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -587,6 +595,53 @@ exit();
 }
 echo "</div>";
 ?>
+
+<?php
+if(!empty($_REQUEST['id']) && !empty($_REQUEST['accessPage'])){
+$userID = $_REQUEST['id'];
+$Access = $_REQUEST['accessPage'];
+$select = "SELECT * FROM users WHERE userID = $userID";
+$selectResult= $pdoObj->query($select);
+foreach($selectResult as $row){
+if($row['nationalCode'] == NULL || $row['email'] == NULL || $row['fullAddress'] == NULL || $row['age'] == NULL || $row['gender'] == NULL || $row['maritalStatus'] == NULL || $row['imageProfile'] == NULL){
+  $bool_info = false;
+  echo "<div class=\"container text-center d-flex justify-content-center mb-4\">
+  <div class=\"row\">
+      <div class=\"card shadow py-2\">
+        <div class=\"card-body\">
+            <div class=\"col\">
+              <i class=\"far fa-frown-open text-danger fa-lg  fa-6x mb-3\"></i>
+                <p> خوش آمدید </p>
+                <p> هنوز اطلاعات خود را تکمیل نکرده اید !!! </p>
+                <p> لطفا اطلاعات خود را از منو سمت راست تکمیل کنید </p>
+            </div>
+           </div>
+     </div>
+  </div>
+  </div>";
+}else{
+  $bool_info = true;
+}
+}
+}
+?>
+<!-- <div class="container text-center d-flex justify-content-center mb-4">
+<div class="row">
+    <div class="card shadow py-2">
+      <div class="card-body">
+          <div class="col">
+            <i class="far fa-smile-beam text-info fa-lg  fa-6x mb-3"></i>
+              <p> خوش آمدید </p>
+              <p> برای حل مشکلات نرم افزاری خود در قسمت چت پایین سمت چپ مشکل خود را با پشتیبانی سایت درمیان بگذارید </p>
+              <p> برای خرید تیکت ابتدا مشکل خود را با پشتیبانی درمیان گذاشته و سپس با راهنمایی آن ها از منو سمت راست گزینه خرید تیکت را انتخاب کنید </p>
+          </div>
+         </div>
+   </div>
+</div>
+</div> -->
+
+<?php if($bool_info == true) : ?>
+
               <section class="section">
               <div class="container-fluid">
               <div class="row ">
@@ -666,16 +721,27 @@ echo "</div>";
               </div>
               </section>
               
+<?php endif; ?>
               
               <?php endif; ?>
               <?php if(!empty($_REQUEST['id']) && !empty($_REQUEST['accessPage']) && $_REQUEST['accessPage'] != "client") : ?>
 
+
+              <?php 
+              $AccessPage = $_REQUEST['accessPage'];
+              if($AccessPage == "managment" ){
+                $bool_info = true;
+              }
+              if($bool_info == true || $AccessPage == "managment") :
+              ?>
+              <?php if(!empty($_REQUEST['id']) && !empty($_REQUEST['accessPage']) && $_REQUEST['accessPage'] != "employee") : ?>
               <h4 class="text-center text-muted font-weight-bold mb-3"> جدول فروش </h4>
               <table class="table bg-light text-center">
                 <thead class="thead-dark">
                   <tr>
-                    <th>#</th>
+                    <th> آی دی </th>
                     <th> نام کاربر </th>
+                    <th> شماره تلفن </th>
                     <th> نوع مشکل </th>
                     <th> تعداد تیکت </th>
                     <th> هزینه پرداخت شده </th>
@@ -689,19 +755,18 @@ echo "</div>";
             
                 <tbody>
                   <?php
-                  $i =0;
                   function hazineTicket($num){
                     return $num*=1000;
                   }
                   foreach($selectResult as $row){
-                    $i++;
                     $userId = $row['userID'];
                     $select2 = "SELECT * FROM users WHERE userID=$userId";
                     $selectResult2= $pdoObj->query($select2);
                     echo "<tr>";
-                    echo "<td>".$i."</td>";
+                    echo "<td>".$userId."</td>";
                     foreach($selectResult2 as $row2){
                     echo "<td>" .$row2['fullName'] ."</td>";
+                    echo "<td>" .$row2['phoneNumber'] ."</td>";
                     break; 
                     }
                     echo "<td>" .$row['title'] ."</td>";
@@ -713,6 +778,9 @@ echo "</div>";
                   ?>
                 </tbody>
               </table>
+
+
+                <?php endif; ?>
             </div>
           </div>
         </div>
@@ -750,89 +818,170 @@ echo "</div>";
 
 
   <section class="section">
-
     <div class="container-fluid">
-
-      <div class="row my-5 ">
+      <div class="row my-5">
         <div class="col-xl-10 col-lg-9 col-md-9 mr-auto">
           <div class="row align-items-center">
             <div class="col-lg-12 mb-4">
-              <h4 class="text-muted font-weight-bold mb-4 text-center"> کامنت های اخیر کارمندان </h4>
-                <div class="card">
-                  <div class="card-header">
-                    <button data-toggle="collapse" data-target="#collapseOne" class="btn btn-secondary btn-block"><img
-                        class="ml-2" width="50" src="./img/man.svg" alt="">
-                      کامنت جدید توسط سجاد رعیت </button>
-                  </div>
-                  <div class="collapse show" id="collapseOne">
-                    <div class="card-body">
-                      لورم ایپسوم متن ساختگی با تولید سادگی نامفهوم از صنعت چاپ و با استفاده از طراحان گرافیک است.لورم
-                      ایپسوم متن ساختگی با تولید سادگی نامفهوم از صنعت چاپ و با استفاده از طراحان گرافیک است.
-                    </div>
-                  </div>
-                </div>
 
-                <div class="card">
-                  <div class="card-header">
-                    <button data-toggle="collapse" data-target="#collapseTwo" class="btn btn-secondary btn-block"><img
-                        class="ml-2" width="50" src="./img/woman.svg" alt="">
-                      کامنت جدید توسط زهرا دشت پیما </button>
-                  </div>
-                  <div class="collapse show" id="collapseTwo">
-                    <div class="card-body">
-                      لورم ایپسوم متن ساختگی با تولید سادگی نامفهوم از صنعت چاپ و با استفاده از طراحان گرافیک است.لورم
-                      ایپسوم متن ساختگی با تولید سادگی نامفهوم از صنعت چاپ و با استفاده از طراحان گرافیک است.
-                    </div>
-                  </div>
-                </div>
 
-                <div class="card">
-                  <div class="card-header">
-                    <button data-toggle="collapse " data-target="#collapseThree" class="btn btn-secondary btn-block"><img
-                        class="ml-2" width="50" src="./img/man-1.svg" alt="">
-                        کامنت جدید توسط بهرام دشتی </button>
-                      </div>
-                  <div class="collapse show" id="collapseThree">
-                    <div class="card-body">
-                      لورم ایپسوم متن ساختگی با تولید سادگی نامفهوم از صنعت چاپ و با استفاده از طراحان گرافیک است.لورم
-                      ایپسوم متن ساختگی با تولید سادگی نامفهوم از صنعت چاپ و با استفاده از طراحان گرافیک است.
-                    </div>
-                  </div>
-                </div>
+            <?php
+	if(!empty($_REQUEST['messageSend']) && $_REQUEST['messageSend'] == "true" && !empty($_REQUEST['id'])){
+    $userID = $_REQUEST['id'];
+		if(isset($_POST['sendMsgEmployee'])){
+      if(!empty($_REQUEST['id']) && !empty($_REQUEST['accessPage']) && $_REQUEST['accessPage'] == "employee"){
+        $ID = 1;
+        $_POST['employeeID'] = 1;
+        $select = "SELECT * FROM users WHERE userID = $userID";
+        $selectResult= $pdoObj->query($select);
+        foreach($selectResult as $row){
+          $fullName = $row['fullName'];
+        break;
+        }
+      }
+			if(!empty($_POST['employeeID'])){
+        if(!empty($_REQUEST['id']) && !empty($_REQUEST['accessPage']) && $_REQUEST['accessPage'] == "managment"){
+          $ID = $_POST['employeeID'];
+          $fullName = "مدیریت";
+        }
+			    $comment = $_POST['messageText'];
+			    $commentDate = date("Y-m-d H:m:s");
+				try{
+       			$insert = "INSERT INTO chat
+     		    (userName, chatMessage, chatDate, userID2, destination)
+   			    VALUES (?, ?, ?, ?, ?)";
+     		    $insertStmnt = $pdoObj->prepare($insert);
+            $insertStmnt->execute([$fullName,$comment,$commentDate,$userID,$ID]);
+            
+            echo "<div class=\"text-center text-success\">";
+            echo "پیام به کارمند مورد نظر با موفقیت ارسال شد";
+            echo "</div>";
 
-                <div class="card">
-                  <div class="card-header">
-                    <button data-toggle="collapse" data-target="#collapseFour" class="btn btn-secondary btn-block"><img
-                        class="ml-2" width="50" src="./img/woman-1.svg" alt="">
-                        کامنت جدید توسط لیلا گنبدی </button>
-                      </div>
-                  <div class="collapse show" id="collapseFour">
-                    <div class="card-body">
-                      لورم ایپسوم متن ساختگی با تولید سادگی نامفهوم از صنعت چاپ و با استفاده از طراحان گرافیک است.لورم
-                      ایپسوم متن ساختگی با تولید سادگی نامفهوم از صنعت چاپ و با استفاده از طراحان گرافیک است.
-                    </div>
-                  </div>
-                </div>
-                
-                <div class="card">
-                  <div class="card-header">
-                    <button data-toggle="collapse" data-target="#collapseFour" class="btn btn-secondary btn-block"><img
-                        class="ml-2" width="50" src="./img/woman-1.svg" alt="">
-                        کامنت جدید توسط مریم ظرافت طاش </button>
-                      </div>
-                  <div class="collapse show" id="collapseFour">
-                    <div class="card-body">
-                      لورم ایپسوم متن ساختگی با تولید سادگی نامفهوم از صنعت چاپ و با استفاده از طراحان گرافیک است.لورم
-                      ایپسوم متن ساختگی با تولید سادگی نامفهوم از صنعت چاپ و با استفاده از طراحان گرافیک است.
-                    </div>
-                  </div>
-                </div>
-            </div>
+        if(!empty($_REQUEST['id']) && !empty($_REQUEST['accessPage'])){
+          $userID = $_REQUEST['id'];
+          $Access = $_REQUEST['accessPage'];
+          redirect("managment.php?id=$userID&accessPage=$Access&messageSend=false");   
+        }else{
+          redirect("managment.php?messageSend=false"); 
+        }
+
+
+        // redirect("managment.php?id=$userID&accessPage=employee");
+				}catch(PDOException $e){
+					echo "<div class=\"text-center text-danger\">";
+      				echo "Error: " . $e->getMessage();
+					echo "</div>";
+      			}
+			}else{
+				echo "<div class=\"text-center text-danger\">";
+				echo "آی دی کارمند وارد نشده است";
+				echo "</div>";
+			}
+		}
+	}
+  if(!empty($_REQUEST['id']) && !empty($_REQUEST['accessPage']) && $_REQUEST['accessPage'] == "managment"){
+          echo "<h4 id=\"banner-par\" class=\"text-dark-50 mx-5\"> ارسال پیام به کارمندان </h4>";
+  }elseif(!empty($_REQUEST['id']) && !empty($_REQUEST['accessPage']) && $_REQUEST['accessPage'] == "employee"){
+          echo "<h4 id=\"banner-par\" class=\"text-dark-50 mx-5\"> ارسال پیام به مدیریت </h4>";
+  }
+          echo "<br>";
+
+    if(!empty($_REQUEST['id']) && !empty($_REQUEST['accessPage'])){
+      $userID = $_REQUEST['id'];
+      $Access = $_REQUEST['accessPage'];
+    echo "<form action=\"managment.php?id=$userID&accessPage=$Access&messageSend=true\" method=\"post\">"; 
+
+    }else{
+      echo "<form action=\"managment.php?messageSend=true\" method=\"post\">"; 
+    }
+    ?>
+      <!-- <div class="form-group">
+        <div class="input-group input-group-lg">
+          <input type="text" class="form-control bg-dark text-white order-2" name="fullName" placeholder="نام">
+          <div class="input-group-append">
+            <span class="input-group-text bg-danger text-white">
+              <i class="fas fa-user"></i>
+            </span>
+          </div>
+        </div>
+      </div> -->
+      <?php if(!empty($_REQUEST['id']) && !empty($_REQUEST['accessPage']) && $_REQUEST['accessPage'] == "managment"): ?>
+      <div class="form-group">
+        <div class="input-group input-group-lg">
+          <input type="number" min="1" name="employeeID" class="form-control bg-dark text-white order-2" placeholder="آی دی کارمند">
+          <div class="input-group-append">
+            <span class="input-group-text bg-danger text-white">
+              <i class="fas fa-envelope"></i>
+            </span>
           </div>
         </div>
       </div>
+      <?php endif; ?>
+      <div class="form-group">
+        <div class="input-group input-group-lg">
+          <textarea class="form-control bg-dark text-white order-2" name="messageText" placeholder="متن پیام"></textarea>
+          <div class="input-group-append">
+            <span class="input-group-text bg-danger text-white">
+              <i class="fas fa-pencil-alt"></i>
+            </span>
+          </div>
+        </div>
+      </div>
+      <button class="btn btn-danger btn-block btn-lg" type="submit" name="sendMsgEmployee"> ارسال </button>
+    </form>
     </div>
+    </div>
+    </div>
+
+    </div>
+    </div>
+
+    </div>
+
   </section>
+
+
+  <section class="section">
+    <div class="container-fluid">
+      <div class="row my-5">
+        <div class="col-xl-10 col-lg-9 col-md-9 mr-auto">
+          <div class="row align-items-center">
+            <div class="col-lg-12 mb-4">
+<?php
+if(!empty($_REQUEST['id'])){
+  $userID = $_REQUEST['id'];
+}
+$select = "SELECT * FROM chat WHERE destination = 1  OR userID2 = 1";
+$selectResult= $pdoObj->query($select);
+foreach($selectResult as $row){
+  $destinationID = $row['destination'];
+  $userID2 = $row['userID2'];
+  if($destinationID == $userID || $userID2 == $userID){
+  echo "<div class=\"row mt-3 mb-2\">";
+    echo "<div class=\"col-xl-9 col-lg-9 col-md-9 \">";
+         echo "<div class=\"comment-context media-body text-white bg-dark p-2\">";
+                echo "<p>" .$row['chatDate'] ."</p>";
+                echo "<h5 class=\"text-right\"><u>" .$row['userName'] ."</u></h5>";
+                echo "<hr>";
+                echo "<div class=\"mt-2\">";
+                    echo "<b> متن پیام : </b>";
+                    echo "<p class=\"mt-1\">" .$row['chatMessage'] ."</p>";
+                echo "</div>";
+        echo "</div>";
+    echo "</div>";
+  echo "</div>";
+  }
+}
+?>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+
+  <?php endif; ?>
   <?php endif; ?>
   <?php if(!empty($_REQUEST['id']) && !empty($_REQUEST['accessPage']) && $_REQUEST['accessPage'] == "client") :
    
@@ -878,6 +1027,16 @@ if(isset($_POST['sendClientInformation'])){
         if($renameOp == true){
         $update = "UPDATE users SET age = '$age' , email = '$email' , fullAddress = '$fullAddress' , gender = '$gender' , imageProfile = '$imageUrl' WHERE userID = $userID";
         $pdoObj->query($update);    
+
+        if(!empty($_REQUEST['id']) && !empty($_REQUEST['accessPage'])){
+          $userID = $_REQUEST['id'];
+          $Access = $_REQUEST['accessPage'];
+          redirect("managment.php?id=$userID&accessPage=$Access&information=false");   
+        }else{
+          redirect("managment.php?information=false"); 
+        }
+
+  
 } else{
 echo "<br> تغییر نام فایل به درستی انجام نشده است<br>";
 echo "<br><a class=\"btn btn-outline-info text-center mt-2\" href=\"managment.php?id=$userID&accessPage=$Access\"> تلاش مجدد </a>";
@@ -923,6 +1082,13 @@ if(!empty($_REQUEST['ticketInformation']) && $_REQUEST['ticketInformation'] == "
           echo "<div class=\"text-center text-success\">";
           echo "خرید تیکت ها با موفقیت انجام شد.";
           echo "</div>";
+          if(!empty($_REQUEST['id']) && !empty($_REQUEST['accessPage'])){
+            $userID = $_REQUEST['id'];
+            $Access = $_REQUEST['accessPage'];
+            redirect("managment.php?id=$userID&accessPage=$Access&ticketInformation=false");   
+          }else{
+            redirect("managment.php?ticketInformation=false"); 
+          }
           }catch(PDOException $e){
               echo "<div class=\"text-center text-danger\">";
                 echo "Error: " . $e->getMessage();
@@ -937,6 +1103,23 @@ if(!empty($_REQUEST['ticketInformation']) && $_REQUEST['ticketInformation'] == "
 }
 echo "</div>";
    ?>
+
+<div class="container text-center d-flex justify-content-center mb-4">
+<div class="row">
+    <div class="card shadow py-2">
+      <div class="card-body">
+          <div class="col">
+            <i class="far fa-smile-beam text-info fa-lg  fa-6x mb-3"></i>
+              <p> خوش آمدید </p>
+              <p> برای حل مشکلات نرم افزاری خود در قسمت چت پایین سمت چپ مشکل خود را با پشتیبانی سایت درمیان بگذارید </p>
+              <p> برای خرید تیکت ابتدا مشکل خود را با پشتیبانی درمیان گذاشته و سپس با راهنمایی آن ها از منو سمت راست گزینه خرید تیکت را انتخاب کنید </p>
+          </div>
+         </div>
+   </div>
+</div>
+</div>
+
+
 
 <h4 class="mb-4"><b> تیکت های خریداری شده </b></h4>
 
@@ -1070,7 +1253,8 @@ echo "</div>";
           </div>
           <div class="form-group">
             <label for="age"> سن </label>
-            <input type="number" name="age" class="form-control">
+            <input type="number" oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);"
+             min="10" max="120" maxlength="3" name="age" class="form-control">
           </div>
           <div class="form-group">
             <label for="text"> آدرس   </label>
@@ -1150,7 +1334,8 @@ echo "</div>";
           </div>
           <div class="form-group">
             <label for="age"> سن </label>
-            <input type="number" name="age" class="form-control">
+            <input type="number" oninput="javascript: if (this.value.length > this.maxLength) this.value = this.value.slice(0, this.maxLength);"
+             min="10" max="120" maxlength="3" name="age" class="form-control">
           </div>
           <div class="form-group">
             <label for="category"> جنسیت  </label>
@@ -1195,7 +1380,7 @@ echo "</div>";
             <label for="category"> نوع مشکل خود را انتخاب کنید  </label>
             <select name="titleOfProblem" class="form-control">
               <option value="installation"> نصب یک برنامه </option>
-              <option value="liecence">  لایسنس </option>
+              <option value="license">  لایسنس </option>
               <option value="brokenApp"> تنظیم نبودن عملکرد یک برنامه </option>
               <option value="etc"> سایر </option>
             </select>
@@ -1216,7 +1401,17 @@ echo "</div>";
   </div>
 </div>
 
-<?php include "chat_page.php"; ?>
+<?php 
+if(!empty($_REQUEST['id']) && !empty($_REQUEST['accessPage'])){
+$AccessPage = $_REQUEST['accessPage'];
+if($AccessPage == "client" || $AccessPage == "managment" ){
+  $bool_info = true;
+}
+if($bool_info == true || $AccessPage == "client"){
+include "chat_page.php";
+}
+}
+?>
 
 
   <script>

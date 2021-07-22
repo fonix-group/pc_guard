@@ -23,7 +23,7 @@ function redirect($url)
 
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css"
     integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous" />
-
+    <link rel="icon" type="image/x-icon" sizes="16x16" href="./img/logo.png">
   <link rel="stylesheet" href="./css/style9.css" />
   <title> پی سی گارد </title>
 </head>
@@ -65,47 +65,34 @@ function redirect($url)
 
 
   <header id="home" class="text-center">
-
-  
       <section id="showcase" class="py-5">
-
         <div class="primary-overlay text-white">
-    
           <div class="container">
-    
             <div id="showcase-height" class="row justify-content-center align-items-center">
-    
               <div class="col-lg-6 text-center ">
-    
                 <h1 id="banner-heading" class="text-white-50 mx-auto my-4 font-weight-bold"><span>PC-GUARD</span>.IR</h1>
                 <h4 id="banner-par" class="text-white-50 mx-auto mt-2  lead"> راهنمای حل مشکلات نرم افزاری </h4>
                 <h4 id="banner-par" class="text-white-50 mx-auto mt-1  lead"> مشکلات نرم افزاری خود را از ما بپرسید </h4>
-    
               </div>
               <div class="col-lg-6 text-center">
     <!-- Signin Section -->
 
     <div id="signin" class="container">
-
       <div class="row">
-
         <div class="col-md-10 col-lg-8 mx-auto text-center">
-
           <i class="far fa-paper-plane fa-2x mb-2 text-white"></i>
           <h2 class="text-white mb-3"> ورود به حساب </h2>
+          <?php if(empty($_REQUEST['id']) && empty($_REQUEST['accessPage'])): ?>
 
           <form method="post" action="index.php">
-
             <div class="form-group">
               <input type="text" maxlength="11" name="phoneNumber" class="form-control border-rad" id="exampleInputEmail"
                 placeholder="شماره تلفن به صورت 09123456789">
             </div>
-
             <div class="form-group">
               <input type="password" name="password" class="form-control border-rad" id="exampleInputPassword"
                 placeholder="رمز ورود">
             </div>
-
             <div class="form-group">
               <div class="form-check">
                 <input type="checkbox" class="form-check-input" id="exampleCheck1">
@@ -123,9 +110,19 @@ function redirect($url)
           <div class="text-center">
             <a class="small" href="#"> فراموشی رمز عبور؟</a>
           </div>
+
+          
           <div class="text-center">
             <a class="small" href="#" data-toggle="modal" data-target="#signup" onclick="openFormsignup()"> ساخت حساب جدید </a>
           </div>
+
+          <?php endif;
+          if(!empty($_REQUEST['id']) && !empty($_REQUEST['accessPage'])){
+            $url = htmlspecialchars($_SERVER['HTTP_REFERER']);
+            echo "<a href='$url' class='btn btn-outline-success btn-block border-rad mt-4 mb-3'> برگشت به پنل </a>"; 
+            echo "<a href='index.php' class='btn btn-outline-danger btn-block border-rad mt-4 mb-4'> خروج از حساب </a>"; 
+          }
+          ?>
           <div class="text-center mt-2">
           <?php
           try{
@@ -135,6 +132,11 @@ function redirect($url)
                 $password = $_POST['password'];
                 $select = "SELECT * FROM users WHERE phoneNumber = '$phoneNumber' AND pass = '$password'";
                 $selectResult= $pdoObj->query($select);
+                $count = $selectResult->rowCount();
+                if($count == 0){
+                  echo "<b> <font color=\"red\">  !!!اطلاعات وارد شده درست نمیباشد!!!</font> </b>";
+                  // exit;
+                }else{
                 foreach($selectResult as $row){
 					$pass = $row['pass'];
                   if($phoneNumber == $row['phoneNumber'] && $password == $row['pass']){
@@ -155,6 +157,7 @@ function redirect($url)
                     echo "<b> <font color=\"red\">  !!!اطلاعات وارد شده درست نمیباشد!!!</font> </b>";
                   }
                 }
+              }
               }else{
                 echo "<b> <font color=\"red\">  !!!لطفا اطلاعات را به درستی وارد کنید!!!</font> </b>";
               }
@@ -170,12 +173,12 @@ function redirect($url)
     
                     if($count == 0){
                       $mFullName = "مدیریت";
-                      $mPhoneNumber = "09170022767";
-                      $mPassword = "0022767";
-                      $mAge = 21;
-                      $mGender = "مرد";
-                      $mEmail = "raeyatsajjad@gmail.com";
-                      $mFullAddress = "مرودشت - خیابان فردوسی - کوچه شهید جباره";
+                      $mPhoneNumber = "admin";
+                      $mPassword = "admin";
+                      $mAge = 20;
+                      $mGender = "";
+                      $mEmail = "";
+                      $mFullAddress = "";
                       $mAccess = "management";
                       $insert = "INSERT INTO users
                       (fullName, phoneNumber, pass, Access, age, gender, email, fullAddress)
@@ -200,7 +203,7 @@ function redirect($url)
                         // echo "ok";
                       if($count2 >0 ){
                         echo "<b> <font color=\"red\">  !!! شماره تلفن وارد شده قبلا ثبت نام شده است !!!</font> </b>";
-                      exit;
+                      // exit;
                       // break;
                       }else{
                         $Access = "client";
@@ -211,11 +214,11 @@ function redirect($url)
                         $insertStmnt->execute([$fullName,$phoneNumber,$password,$Access]);
                         if($insertStmnt == true){
                           echo "<b><font color=\"green\"> اطلاعات به درستی ذخیره شده </font></b>";
-                        exit;
+                        // exit;
                         // break;
                         }else{
                           echo "<b> <font color=\"red\">  !!!اطلاعات به درستی ذخیره نشده است!!!</font> </b>";
-                        exit;
+                        // exit;
                         // break;
                         }
                       }
@@ -260,7 +263,7 @@ function redirect($url)
                         $ext = $validFileExt[$fileExtIndex];
                         }else{
                         echo " فرمت تصویر وارد شده درست نیست ";
-                        exit();
+                        // exit();
                         }
                 
                     $ImageDir = "img/";
@@ -291,11 +294,11 @@ function redirect($url)
                       $pdoObj->query($update);    
           } else{
           echo "<br> تغییر نام فایل به درستی انجام نشده است<br>";
-          exit();
+          // exit();
           }
                   }else{
                     echo "<br>File Submission Error1!<br>";
-                    exit();
+                    // exit();
                     }
                   
                   }else{
@@ -330,10 +333,22 @@ function redirect($url)
      		    (fullName, email, messageText, messageDate)
    			    VALUES (?, ?, ?, ?)";
      		    $insertStmnt = $pdoObj->prepare($insert);
-      			$insertStmnt->execute([$fullName,$email,$comment,$commentDate]);
-				echo "<div class=\"text-center text-success\">";
-				echo "پیام به پشتیبانی با موفقیت ارسال شد";
-				echo "</div>";
+            $insertStmnt->execute([$fullName,$email,$comment,$commentDate]);
+            
+            echo "<div class=\"text-center text-success\">";
+            echo "پیام به پشتیبانی با موفقیت ارسال شد";
+            echo "</div>";
+
+        if(!empty($_REQUEST['id']) && !empty($_REQUEST['accessPage'])){
+          $userID = $_REQUEST['id'];
+          $Access = $_REQUEST['accessPage'];
+          redirect("index.php?id=$userID&accessPage=$Access&messageSend=false");   
+        }else{
+          redirect("index.php?messageSend=false"); 
+        }
+
+
+        // redirect("managment.php?id=$userID&accessPage=employee");
 				}catch(PDOException $e){
 					echo "<div class=\"text-center text-danger\">";
       				echo "Error: " . $e->getMessage();
@@ -376,179 +391,101 @@ function redirect($url)
 
           <div class="underline mb-4"></div>
 
-          <p class="text-white-50">لورم ایپسوم متن ساختگی با تولید سادگی نامفهوم از صنعت چاپ و با استفاده از طراحان
-            گرافیک است. چاپگرها و متون بلکه روزنامه و مجله در ستون و سطرآنچنان که لازم است و برای شرایط فعلی تکنولوژی
-            مورد نیاز و کاربردهای متنوع با هدف بهبود ابزارهای کاربردی می باشد.
-           </p>
-
+          <p class="text-white-50">مجموعه ی فونیکس، به دنبال راهی برای آسان شدن حل مشکلات نرم افزاری شما عزیزان می باشد. از این رو ما تیمی با افراد متخصص 
+ ادر حوزه ی نرم افزار تشکیل داده ایم. که دغدغه ی ما تنها حل مشکلات شماست.</p>
+          <p class="text-white-50">  از اعتماد شما سپاس گزاریم. </p>
         </div>
 
       </div>
 
       <div class="row my-5">
-
         <div class="col-md-4 text-center">
-
           <i class="fas fa-cogs fa-5x text-white-50 mb-4"></i>
-
           <h3 class="text-white mb-3"> حل مشکل </h3>
-          <p class="text-white-50">لورم ایپسوم متن ساختگی با تولید سادگی نامفهوم از صنعت چاپ و با استفاده از طراحان
-            گرافیک است. </p>
-
+          <p class="text-white-50">تیم ما شامل افراد متخصصی ست که تنها دغدغه‌ شان حل مشکلات نرم افزاری شما عزیزان است. حل مشکلات خود را با خیال راحت به ما بسپارید.</p>
         </div>
-
         <div class="col-md-4 text-center">
-
           <i class="fas fa-thumbs-up fa-5x text-white-50 mb-4"></i>
           <h3 class="text-white mb-3"> پشتیبانی </h3>
-          <p class="text-white-50">لورم ایپسوم متن ساختگی با تولید سادگی نامفهوم از صنعت چاپ و با استفاده از طراحان
-            گرافیک است. </p>
+          <p class="text-white-50">پشتیبانی 24ساعته پی سی گارد، در همه ی ساعات پاسخگوی شما عزیزان می باشد.</p>
 
         </div>
-
         <div class="col-md-4 text-center">
-
           <i class="fas fa-handshake fa-5x text-white-50 mb-4"></i>
           <h3 class="text-white mb-3"> رضایت مشتری </h3>
-          <p class="text-white-50">لورم ایپسوم متن ساختگی با تولید سادگی نامفهوم از صنعت چاپ و با استفاده از طراحان
-            گرافیک است. </p>
+          <p class="text-white-50">وقت شما و هزینه ای که می پردازید برای ما اهمیت دارد. به واسطه سیستم های نظارتی و نظر سنجی در سطوح مختلف، کیفیت فنی، زمانی و ادبی تک تک مکالمات مشتریان بررسی شده و در مواردی که حقی از مشتری ضایع شده باشد، سعی بر جبران خسارت وارده، در اولویت فعالیت های شرکت خواهد بود.
+</p>
 
         </div>
-
       </div>
-
     </div>
-
   </section>
 
 
   <!-- Projects Section -->
   <section id="projects" class="bg-light">
-    
     <div class="container">
-
-      <!-- Featured Project Row -->
       <div class="row align-items-center no-gutters mb-4 mb-lg-5">
-
         <div class="col-xl-6 col-lg-5">
-
-          <section id="video">
-            <div class="container text-center text-white py-5">
-
-
-            <a href="#" class="video text-white" data-video="./video/foenix.mp4" data-toggle="modal"
-            data-target="#videoModal" onclick="openVideo()">
-            <i class="fas fa-play fa-3x"></i></a>
-  
-          <h4 class=" mt-3">نمایش ویدو ما</h4>
-          </div>
-        </section>
         </div>
-
-        <div class="col-xl-4 col-lg-5">
-
-          <div class="featured-text text-center text-lg-right">
-
-            <h4> لورم ایپسوم </h4>
-            <p class="text-black-50 mb-0">
-              لورم ایپسوم متن ساختگی با تولید سادگی نامفهوم از صنعت چاپ و با استفاده از طراحان
-              گرافیک است.
-              لورم ایپسوم متن ساختگی با تولید سادگی نامفهوم از صنعت چاپ و با استفاده از طراحان
-              گرافیک است.
-            </p>
-
-          </div>
-
-        </div>
-
-      </div>
-
-
       <!-- Project One Row -->
       <div class="row justify-content-center no-gutters mb-5 mb-lg-0">
-
         <div class="col-lg-6">
-
           <img class="img-fluid" src="img/demo1.jpg" alt="">
-
         </div>
-
         <div class="col-lg-6">
-
           <div class="bg-black text-center h-100">
-
             <div class="d-flex h-100">
-
               <div class="project-text my-auto text-center text-lg-right">
-
-                <h4 class="text-white">لورم</h4>
+                <h4 class="text-white">  سرعت بالا </h4>
                 <p class="mb-0 text-white-50">
-                  لورم ایپسوم متن ساختگی با تولید سادگی نامفهوم از صنعت چاپ و با استفاده از طراحان
-                  گرافیک است.</p>
-                <hr class="d-none d-lg-block mb-0 mr-0">
-
+                کارشناسان پی سی گارد در کمترین زمان ممکن پس از مشخص شدن نوع مشکل شما، به حل مشکل میپردازند </p>
+               <hr class="d-none d-lg-block mb-0 mr-0">
               </div>
-
             </div>
-
           </div>
-
         </div>
-
       </div>
-
 
 
       <!-- Project Two Row -->
       <div class="row justify-content-center no-gutters">
-        
         <div class="col-lg-6">
-
-          <img class="img-fluid" src="img/demo2.jpg" alt="">
-
+          <img class="img-fluid" src="img/demo2_3.jpg" alt="">
         </div>
-
         <div class="col-lg-6 order-lg-first">
-
           <div class="bg-black text-center h-100 project">
-
             <div class="d-flex h-100">
-
               <div class="project-text w-100 my-auto text-center text-lg-right">
-
-                <h4 class="text-white"> لورم ایپسوم </h4>
+                <h4 class="text-white">  کیفیت بالا </h4>
                 <p class="mb-0 text-white-50">
-                  لورم ایپسوم متن ساختگی با تولید سادگی نامفهوم از صنعت چاپ و با استفاده از طراحان
-                  گرافیک است.</p>
+                متخصصین ما علاوه بر دانش آکادمیک، با گذراندن دوره های تخصصی متفاوت در زمینه علوم رایانه قادرند به طیف وسیعی از سوالات شما هموطنان ارجمند پاسخگو باشند. </p>
                 <hr class="d-none d-lg-block mb-0 mr-0">
               </div>
-
             </div>
-
           </div>
-
         </div>
-
       </div>
-
     </div>
-
   </section>
-
-  
 
 
   <section id="contact" class="bg-black">
-
-       <!-- CONTACT -->
     <div class="container">
-
       <div class="row">
-
         <div class="col-md-10 col-lg-8 mx-auto text-center">
           <h4 id="banner-par" class="text-white-50 mx-5"> ارسال پیام به صورت مستقیم </h4>
           <br>
-    <?php echo "<form action=\"index.php?messageSend=true\" method=\"post\">"; ?>
+    <?php
+    if(!empty($_REQUEST['id']) && !empty($_REQUEST['accessPage'])){
+      $userID = $_REQUEST['id'];
+      $Access = $_REQUEST['accessPage'];
+    echo "<form action=\"index.php?id=$userID&accessPage=$Access&messageSend=true\" method=\"post\">"; 
+
+    }else{
+      echo "<form action=\"index.php?messageSend=true\" method=\"post\">"; 
+    }
+    ?>
       <div class="form-group">
         <div class="input-group input-group-lg">
           <input type="text" class="form-control bg-dark text-white order-2" name="fullName" placeholder="نام">
@@ -587,23 +524,16 @@ function redirect($url)
 
       <div class="social d-flex justify-content-center py-5">
         <h4 id="banner-par" class="text-white-50 mx-5">ارتباط با ما از طریق :</h4>
-        <!-- <a href="#" class="mx-2">
-          <i class="fab fa-twitter"></i>
-        </a>
-        <a href="#" class="mx-2">
-          <i class="fab fa-facebook-f"></i>
-        </a> -->
-        <a href="https://github.com/fonix-group/pc-guard" target="_blank" class="mx-2"><i class="fab fa-github"></i></a>
+
+        <a href="https://github.com/foenix-group/pc_guard.git" target="_blank" class="mx-2"><i class="fab fa-github"></i></a>
         <a href="https://t.me/joinchat/2E0MU7qYMcw3NzFk" target="_blank" class="mx-2"><i class="fab fa-telegram-plane"></i></a>
         <a href="https://instagram.com/pc.guard?utm_medium=copy_link" target="_blank" class="mx-2"><i class="fab fa-instagram"></i></a>
-        <a href="fonix.group992@gmail.com" target="_blank" class="mx-2"><i class="fas fa-envelope"></i></a>
         
       </div>
 
     </div>
 
   </section>
-
 
 
   <!-- Footer -->
@@ -626,29 +556,6 @@ function redirect($url)
     </div>
 
   </footer>
-
-  <!-- Video Modal -->
-  <div id="videoModal" class="modal fade">
-
-    <div class="modal-dialog">
-
-      <div class="modal-content">
-
-        <div class="modal-body">
-
-          <button class="close cancel" onclick="closeVideo()" data-dismiss="modal">
-            <span> &times; </span>
-          </button>
-
-          <iframe src="./video/foenix.mp4" frameborder="1" height="350" width="100%" allowfullscreen></iframe>
-
-        </div>
-
-      </div>
-
-    </div>
-
-  </div>
 
 
   <!-- ADD POST MODAL -->
@@ -698,7 +605,7 @@ function redirect($url)
             
 
          </div>
-		 <button type="button" class="cancel btn btn-danger border-rad btn-block" onclick="closeFormsignup()"> خروج </button>          
+		 <button class="btn btn-danger border-rad btn-block" onclick="closeFormsignup()"> خروج </button>          
 
 
 </form>

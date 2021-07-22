@@ -47,7 +47,7 @@ $chatTbl= "CREATE TABLE IF NOT EXISTS chat(
      userID2 int(11) NOT NULL,
      destination varchar(100) NOT NULL DEFAULT 'employee',
      PRIMARY KEY (chatID),
-     FOREIGN KEY (userID2) REFERENCES users (userID) ON DELETE RESTRICT ON UPDATE CASCADE
+     FOREIGN KEY (userID2) REFERENCES users (userID) ON DELETE CASCADE ON UPDATE CASCADE
      )";
      $results = $pdoObj->query($chatTbl);
 
@@ -67,8 +67,9 @@ $chatTbl= "CREATE TABLE IF NOT EXISTS chat(
             num int(2) NOT NULL,
             title varchar(255) NOT NULL,
             PRIMARY KEY (ticketID),
-            FOREIGN KEY (userID) REFERENCES users (userID) ON DELETE RESTRICT ON UPDATE CASCADE
+            FOREIGN KEY (userID) REFERENCES users (userID) ON DELETE CASCADE ON UPDATE CASCADE
             )";
             $results = $pdoObj->query($ticketTbl);
+
 
 ?>
